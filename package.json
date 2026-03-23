@@ -1,0 +1,15 @@
+{
+  "name": "fileviewer",
+  "version": "1.0.0",
+  "description": "Web server for browsing directories and rendering Markdown, JSON, and JSONL files",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "markdown-it": "^14.0.0",
+    "yaml": "^2.8.1"
+  }
+}

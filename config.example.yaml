@@ -1,0 +1,56 @@
+listen: 127.0.0.1
+port: 8080
+
+mounts:
+  "$HOME":
+    "///name": home
+    Documents:
+      "///name": docs
+      "///rules":
+        - allow:
+            - project1
+            - project2
+        - deny:
+            - "*"
+      project1:
+        "///rules":
+          - allow:
+              - reports
+              - notes
+          - deny:
+              - "*"
+  /var/www/html:
+    "///name": site
+    "///rules":
+      - allow:
+          - assets
+          - logs
+      - deny:
+          - "*"
+
+gitDirs:
+  "git@github.com:example/project.git":
+    "///rules":
+      - allow:
+          - src
+          - docs
+      - deny:
+          - "*"
+    src:
+      "///rules":
+        - allow:
+            - api
+            - worker
+        - deny:
+            - "*"
+
+defaultPreRules:
+  - allow:
+      - "*.json"
+      - "*.jsonl"
+      - "*.md"
+  - deny:
+      - ".*"
+      - "__pycache__"
+
+defaultPostRules: []

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{TITLE}} - File Viewer</title>
+  <link rel="stylesheet" href="/__static/style.css">
+  <script>
+    // Apply saved theme before paint to prevent flash
+    (function() {
+      var t = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
+<body>
+  <button class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode"></button>
+  <div class="container">
+    {{BODY}}
+  </div>
+  <script>
+    (function() {
+      var btn = document.getElementById('theme-toggle');
+      function update() {
+        var t = document.documentElement.getAttribute('data-theme');
+        btn.textContent = t === 'dark' ? '\u2600' : '\u263E';
+      }
+      btn.addEventListener('click', function() {
+        var curr = document.documentElement.getAttribute('data-theme');
+        var next = curr === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        update();
+      });
+      update();
+    })();
+  </script>
+</body>
+</html>
