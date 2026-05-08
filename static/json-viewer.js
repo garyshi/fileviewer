@@ -39,17 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       target.querySelectorAll('details').forEach(d => d.open = false);
     }
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    if (e.key === 'e') {
-      document.querySelectorAll('.json-tree details').forEach(d => d.open = true);
-    } else if (e.key === 'c') {
-      document.querySelectorAll('.json-tree details').forEach(d => d.open = false);
-    }
-  });
-});
+  });});
 
 function collapseToDepth(maxDepth) {
   function walk(el, depth) {
