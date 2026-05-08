@@ -5,6 +5,7 @@ import { resolveRequestPath, breadcrumbs, renderBreadcrumbs, globMatch, mountHre
 const config = {
   mounts: [
     {
+      source: '$HOME',
       rootPath: '/home/user',
       name: 'home',
       nameSegments: ['home'],
@@ -17,6 +18,7 @@ const config = {
       },
     },
     {
+      source: '/var/www/html',
       rootPath: '/var/www/html',
       name: '/var/www/html',
       nameSegments: ['var', 'www', 'html'],
@@ -48,6 +50,18 @@ describe('resolveRequestPath', () => {
 
   it('blocks traversal outside the mount root', () => {
     assert.equal(resolveRequestPath('/home/%2e%2e/etc/passwd', config), null);
+  });
+
+  it('aliases ~ to the $HOME mount', () => {
+    const result = resolveRequestPath('/~/docs/', config);
+    assert.equal(result.type, 'path');
+    assert.equal(result.absPath, '/home/user/Documents');
+  });
+
+  it('aliases ~ at the mount root', () => {
+    const result = resolveRequestPath('/~/', config);
+    assert.equal(result.type, 'path');
+    assert.equal(result.absPath, '/home/user');
   });
 });
 
