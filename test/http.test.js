@@ -95,6 +95,10 @@ describe('HTTP server', () => {
     fs.writeFileSync(path.join(tmpDir, 'data.json'), '{"name":"test","items":[1,2,3]}');
     fs.writeFileSync(path.join(tmpDir, 'log.jsonl'), '{"a":1}\n{"b":2}\n');
     fs.writeFileSync(path.join(tmpDir, 'notes.txt'), 'unsupported');
+    fs.writeFileSync(path.join(tmpDir, 'page.html'), '<h1>Verbatim</h1>');
+    fs.writeFileSync(path.join(tmpDir, 'app.js'), 'console.log("hi");');
+    fs.writeFileSync(path.join(tmpDir, 'style.css'), 'body { color: red; }');
+    fs.writeFileSync(path.join(tmpDir, 'pixel.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
     fs.writeFileSync(path.join(tmpDir, 'docs', 'allowed.md'), '# Allowed');
     fs.writeFileSync(path.join(tmpDir, 'docs', 'blocked.md'), '# Blocked');
 
@@ -210,6 +214,49 @@ describe('HTTP server', () => {
     assert.ok(res.body.includes('Line 1'));
     assert.ok(res.body.includes('Line 2'));
     assert.ok(res.body.includes('jsonl-line'));
+  });
+
+  // Verbatim serving
+  it('serves HTML verbatim with text/html content-type', async (t) => {
+    if (requireHttpServer(t)) return;
+    const res = await fetch('/home/page.html');
+    assert.equal(res.status, 200);
+    assert.ok(res.headers['content-type'].includes('text/html'));
+    assert.equal(res.body, '<h1>Verbatim</h1>');
+    // Served raw, not wrapped in the layout template
+    assert.ok(!res.body.includes('breadcrumbs'));
+  });
+
+  it('serves JS verbatim with javascript content-type', async (t) => {
+    if (requireHttpServer(t)) return;
+    const res = await fetch('/home/app.js');
+    assert.equal(res.status, 200);
+    assert.ok(res.headers['content-type'].includes('javascript'));
+    assert.equal(res.body, 'console.log("hi");');
+  });
+
+  it('serves CSS verbatim with text/css content-type', async (t) => {
+    if (requireHttpServer(t)) return;
+    const res = await fetch('/home/style.css');
+    assert.equal(res.status, 200);
+    assert.ok(res.headers['content-type'].includes('text/css'));
+    assert.equal(res.body, 'body { color: red; }');
+  });
+
+  it('serves media (PNG) verbatim with image content-type', async (t) => {
+    if (requireHttpServer(t)) return;
+    const res = await fetch('/home/pixel.png');
+    assert.equal(res.status, 200);
+    assert.ok(res.headers['content-type'].includes('image/png'));
+  });
+
+  it('lists verbatim files in directory view', async (t) => {
+    if (requireHttpServer(t)) return;
+    const res = await fetch('/home/');
+    assert.ok(res.body.includes('page.html'));
+    assert.ok(res.body.includes('app.js'));
+    assert.ok(res.body.includes('style.css'));
+    assert.ok(res.body.includes('pixel.png'));
   });
 
   // Error handling

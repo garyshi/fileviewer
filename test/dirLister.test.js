@@ -37,6 +37,9 @@ describe('listDirectory', () => {
     fs.writeFileSync(path.join(tmpDir, 'log.jsonl'), '{}');
     fs.writeFileSync(path.join(tmpDir, 'notes.txt'), 'nope');
     fs.writeFileSync(path.join(tmpDir, 'image.png'), 'nope');
+    fs.writeFileSync(path.join(tmpDir, 'page.html'), '<h1>hi</h1>');
+    fs.writeFileSync(path.join(tmpDir, 'app.js'), 'console.log(1)');
+    fs.writeFileSync(path.join(tmpDir, 'style.css'), 'body{}');
   });
 
   after(() => {
@@ -51,8 +54,11 @@ describe('listDirectory', () => {
     assert.ok(result.listHtml.includes('readme.md'));
     assert.ok(result.listHtml.includes('data.json'));
     assert.ok(result.listHtml.includes('log.jsonl'));
+    assert.ok(result.listHtml.includes('image.png'));
+    assert.ok(result.listHtml.includes('page.html'));
+    assert.ok(result.listHtml.includes('app.js'));
+    assert.ok(result.listHtml.includes('style.css'));
     assert.ok(!result.listHtml.includes('notes.txt'));
-    assert.ok(!result.listHtml.includes('image.png'));
   });
 
   it('applies custom deny rules', async () => {

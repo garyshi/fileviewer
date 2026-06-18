@@ -9,6 +9,10 @@ It typically runs on a remote dev server. The HTTP port it runs on is typically 
 * **Markdown** (`*.md`): rendered with `markdown-it` using a CommonMark-style baseline plus GFM-style task lists
 * **JSON** (`*.json`): formatted with interactive folding / expanding
 * **JSONL** (`*.jsonl`): each line displayed as a collapsible JSON object
+* **Web assets** (`*.html`, `*.htm`, `*.js`, `*.mjs`, `*.css`): served verbatim with the appropriate `Content-Type`
+* **Media** (images, audio, video) and other static assets (`*.png`, `*.jpg`, `*.jpeg`, `*.gif`, `*.svg`, `*.webp`, `*.bmp`, `*.ico`, `*.avif`, `*.mp4`, `*.webm`, `*.ogv`, `*.mov`, `*.mp3`, `*.wav`, `*.ogg`, `*.flac`, `*.m4a`, `*.aac`, `*.pdf`, `*.woff`, `*.woff2`, `*.ttf`, `*.otf`): served verbatim
+
+Markdown, JSON, and JSONL files are rendered to HTML; all other supported types are served verbatim (raw bytes). The full verbatim extension list lives in [`lib/mime.js`](/home/gary.shi/fileviewer/lib/mime.js).
 
 Directory views show subdirs and supported file types only. Unsupported file types are hidden.
 Rule checks also apply to direct URL requests, so denied entries are blocked rather than merely omitted from listings.
