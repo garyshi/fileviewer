@@ -123,6 +123,19 @@ body {
 .dir-listing .dir a::before { content: "\1F4C1 "; }
 .dir-listing .file a::before { content: "\1F4C4 "; }
 
+/* Embedded HTML pages */
+.file-content.html-frame { padding: 0; }
+.html-frame-embed {
+  display: block;
+  /* Break out of the centered .container so wide pages aren't clipped. */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  height: calc(100vh - 120px);
+  border: none;
+  border-top: 1px solid var(--border);
+  background: #fff;
+}
+
 /* Markdown */
 .file-content.markdown { font-size: 16px; line-height: 1.8; }
 .file-content.markdown h1 { font-size: 2em; margin: 0.67em 0; padding-bottom: 0.3em; border-bottom: 1px solid var(--border); }

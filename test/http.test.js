@@ -217,14 +217,31 @@ describe('HTTP server', () => {
   });
 
   // Verbatim serving
-  it('serves HTML verbatim with text/html content-type', async (t) => {
+  it('wraps HTML pages in the layout frame', async (t) => {
     if (requireHttpServer(t)) return;
     const res = await fetch('/home/page.html');
     assert.equal(res.status, 200);
     assert.ok(res.headers['content-type'].includes('text/html'));
+    // Framed: chrome present, page content loaded via an iframe (not inlined)
+    assert.ok(res.body.includes('breadcrumbs'));
+    assert.ok(res.body.includes('<iframe'));
+    assert.ok(res.body.includes('src="/__raw/home/page.html"'));
+    assert.ok(!res.body.includes('<h1>Verbatim</h1>'));
+  });
+
+  it('serves HTML verbatim under the /__raw/ prefix', async (t) => {
+    if (requireHttpServer(t)) return;
+    const res = await fetch('/__raw/home/page.html');
+    assert.equal(res.status, 200);
+    assert.ok(res.headers['content-type'].includes('text/html'));
     assert.equal(res.body, '<h1>Verbatim</h1>');
-    // Served raw, not wrapped in the layout template
     assert.ok(!res.body.includes('breadcrumbs'));
+  });
+
+  it('enforces rules on /__raw/ requests', async (t) => {
+    if (requireHttpServer(t)) return;
+    const res = await fetch('/__raw/home/docs/blocked.md');
+    assert.equal(res.status, 403);
   });
 
   it('serves JS verbatim with javascript content-type', async (t) => {
