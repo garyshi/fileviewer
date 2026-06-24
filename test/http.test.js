@@ -1,4 +1,4 @@
-import { describe, it, before, after } from 'node:test';
+import { describe, it, before, after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import fs from 'node:fs';
@@ -81,6 +81,77 @@ function requireHttpServer(t) {
   }
   return false;
 }
+
+function makeMockResponse() {
+  return {
+    statusCode: null,
+    headers: {},
+    chunks: [],
+    writeHead(statusCode, headers = {}) {
+      this.statusCode = statusCode;
+      this.headers = headers;
+    },
+    end(chunk = '') {
+      this.chunks.push(chunk);
+    },
+    get body() {
+      return Buffer.concat(this.chunks.map((chunk) => Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))).toString('utf8');
+    },
+  };
+}
+
+test('raw markdown requests serve markdown without the rendered layout', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'fv-raw-md-'));
+  try {
+    fs.writeFileSync(path.join(root, 'readme.md'), '# Hello World\n\nThis is a test.');
+    await loadTemplates();
+
+    const config = {
+      ...makeConfig(),
+      mounts: [{
+        ...makeConfig().mounts[0],
+        rootPath: root,
+      }],
+    };
+
+    const res = makeMockResponse();
+    await handleRequest({ url: '/__raw/home/readme.md', headers: { host: LOOPBACK_HOST } }, res, config);
+
+    assert.equal(res.statusCode, 200);
+    assert.ok(res.headers['Content-Type'].includes('text/markdown'));
+    assert.equal(res.body, '# Hello World\n\nThis is a test.');
+    assert.ok(!res.body.includes('breadcrumbs'));
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('rendered markdown pages link to the raw markdown view', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'fv-raw-md-link-'));
+  try {
+    fs.writeFileSync(path.join(root, 'readme.md'), '# Hello World\n\nThis is a test.');
+    await loadTemplates();
+
+    const config = {
+      ...makeConfig(),
+      mounts: [{
+        ...makeConfig().mounts[0],
+        rootPath: root,
+      }],
+    };
+
+    const res = makeMockResponse();
+    await handleRequest({ url: '/home/readme.md', headers: { host: LOOPBACK_HOST } }, res, config);
+
+    assert.equal(res.statusCode, 200);
+    assert.ok(res.headers['Content-Type'].includes('text/html'));
+    assert.ok(!res.body.includes('file-actions'));
+    assert.ok(res.body.includes('<span>readme.md</span> <span class="raw-markdown-link">(<a href="/__raw/home/readme.md">raw</a>)</span>'));
+    assert.ok(res.body.includes('href="/__raw/home/readme.md"'));
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
 
 describe('HTTP server', () => {
   before(async () => {
@@ -193,6 +264,24 @@ describe('HTTP server', () => {
     assert.ok(res.body.includes('<h1>'));
     assert.ok(res.body.includes('Hello World'));
     assert.ok(res.body.includes('breadcrumbs'));
+  });
+
+  it('links rendered markdown files to their raw markdown view', async (t) => {
+    if (requireHttpServer(t)) return;
+    const res = await fetch('/home/readme.md');
+    assert.equal(res.status, 200);
+    assert.ok(!res.body.includes('file-actions'));
+    assert.ok(res.body.includes('<span>readme.md</span> <span class="raw-markdown-link">(<a href="/__raw/home/readme.md">raw</a>)</span>'));
+    assert.ok(res.body.includes('href="/__raw/home/readme.md"'));
+  });
+
+  it('serves markdown verbatim under the /__raw/ prefix', async (t) => {
+    if (requireHttpServer(t)) return;
+    const res = await fetch('/__raw/home/readme.md');
+    assert.equal(res.status, 200);
+    assert.ok(res.headers['content-type'].includes('text/markdown'));
+    assert.equal(res.body, '# Hello World\n\nThis is a test.');
+    assert.ok(!res.body.includes('breadcrumbs'));
   });
 
   // JSON rendering

@@ -105,6 +105,14 @@ body {
 .breadcrumbs a { color: var(--link); text-decoration: none; }
 .breadcrumbs a:hover { text-decoration: underline; }
 .breadcrumbs span { color: var(--fg-muted); }
+.breadcrumbs .raw-markdown-link {
+  font-size: 12px;
+}
+.breadcrumbs .raw-markdown-link a {
+  color: var(--link);
+  text-decoration: none;
+}
+.breadcrumbs .raw-markdown-link a:hover { text-decoration: underline; }
 
 /* Directory listing */
 .dir-listing { list-style: none; }
